@@ -1,0 +1,30 @@
+server:
+  port: 8081
+
+---
+
+upload:
+  path: src/main/resources/images/
+
+spring:
+  application:
+    name: liquors-file-manager
+
+  datasource:
+    username: ${DB_USERNAME}
+    url: jdbc:postgresql://${DB_HOST}/${DB_NAME}
+    password: ${DB_PASSWORD}
+    test-on-borrow: true
+    validation-query: SELECT 1 FROM dual
+    jpa:
+      show-sql: true
+      hibernate:
+        format-sql: true
+        ddl-auto: create
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 6MB
+      max-file-size: 6MB
+
+
