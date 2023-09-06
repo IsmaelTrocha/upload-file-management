@@ -1,4 +1,4 @@
-package com.liquors.file.infrastructure.shared.mapper;
+package com.liquors.file.shared.mapper;
 
 public interface EntityToDto <E,O>{
 

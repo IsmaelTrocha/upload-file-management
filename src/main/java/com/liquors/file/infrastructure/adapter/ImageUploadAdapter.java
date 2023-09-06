@@ -2,7 +2,7 @@ package com.liquors.file.infrastructure.adapter;
 
 import com.liquors.file.domain.entity.ImageUpload;
 import com.liquors.file.domain.service.UploadImageService;
-import com.liquors.file.infrastructure.repository.ImageUploadDto;
+import com.liquors.file.infrastructure.mapper.ImageUploadDtoMapper;
 import com.liquors.file.infrastructure.repository.ImageUploadRepository;
 import java.io.File;
 import java.nio.file.Files;
@@ -21,11 +21,10 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class ImageUploadAdapter implements UploadImageService {
 
-  private static final long MAX_FILE_SIZE = 6 * 1024 * 1024;
-
   @Value("${upload.path}")
   private String path;
   private final ImageUploadRepository imageUploadRepository;
+  private final ImageUploadDtoMapper imageUploadDtoMapper;
 
   @Override
   public ImageUpload saveImage(MultipartFile imageUpload) {
@@ -35,8 +34,6 @@ public class ImageUploadAdapter implements UploadImageService {
       byte[] bytes = imageUpload.getBytes();
 
       validFile(imageUpload);
-      validFileMaxSize(imageUpload);
-
       File folder = new File(path);
       existsFolder(folder.getPath());
 
@@ -45,10 +42,7 @@ public class ImageUploadAdapter implements UploadImageService {
       Files.write(paths, bytes);
       imageUpload1.setName(fileName);
       imageUpload1.setResource(path + fileName);
-      ImageUploadDto image = new ImageUploadDto();
-      image.setName(imageUpload1.getName());
-      image.setResource(imageUpload1.getResource());
-      imageUploadRepository.save(image);
+      imageUploadRepository.save(imageUploadDtoMapper.toDto(imageUpload1));
     } catch (Exception exception) {
       throw new RuntimeException(exception.getMessage());
     }
@@ -57,15 +51,11 @@ public class ImageUploadAdapter implements UploadImageService {
 
   private static void validFile(MultipartFile multipartFile) {
     if (multipartFile.getName().endsWith(".jpg")) {
-      throw new RuntimeException("File must end with .jpg , jpeg or .png, please send a valid File.");
+      throw new RuntimeException(
+          "File must end with .jpg , jpeg or .png, please send a valid File.");
     }
   }
 
-  private static void validFileMaxSize(MultipartFile multipartFile) {
-    if (multipartFile.getSize() > MAX_FILE_SIZE) {
-      throw new RuntimeException("File size must be less than 6MB");
-    }
-  }
 
   private static void existsFolder(String path) {
     File folder = new File(path);
